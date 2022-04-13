@@ -5,151 +5,137 @@
 2.3. Перенести функционал подсчета корзины на объектно-ориентированную базу.
 */
 
-function cartObject(){
-  const cart = new Object();
-  cart['sum'] = 0;
-  cart['quantity'] = 0;
-  return cart
-}
-
-//Шапка
-function header(title, message=false) {
-  let c = '';
-  c += cart_dict.line;
-  c += cart_dict.n;
-  c += title;
-  c += cart_dict.n;
-  c += cart_dict.line;
-  c += cart_dict.n;
-  c += message ? message: '';
-  return c;
-}
-
-//Подвал
-function footer(obj){
-  let c = '';
-  c += cart_dict.line;
-  c += cart_dict.n;
-  c += cart_dict.total_products + ' ' + obj.quantity + ' ' + cart_dict.unit_of_measurement;
-  c += cart_dict.n;
-  c += cart_dict.amount + obj.sum + ' ' + cart_dict.currency;
-  c += cart_dict.n;
-  c += cart_dict.n;
-  c += cart_dict.message_basket;
-  return c;
-}
-
-// Корзина
-function basketCart(order, obj) {
-  let c = '';
-  c += header(cart_dict.your_order);
-  c += order;
-  c += footer(obj)
-  return c;
-}
-
-function onlineStore(basket){
-  const obj = cartObject();
-  let order = '';
-
-  basket.forEach(function(item){
-    let total = item.price * item.quantity;
-    obj.sum += total;
-    obj.quantity += item.quantity;
-    order += item.name;
-    order += ' '.repeat((20 - (item.name.length + String(item.quantity).length))*2);
-    order += item.quantity + ' ' + cart_dict.unit_of_measurement;
-    order += ' '.repeat((11 - String(total).length)*2);
-    order += total + ' ' + cart_dict.currency;
-    order += cart_dict.n;    
-  });
-
-  return obj.quantity < 1 ? header(cart_dict.basket_null, cart_dict.message_basket) : basketCart(order, obj);
-}
-
-function marketPlace(products){
-  let showcase = '';
-
-  showcase += header(cart_dict.market);
-
-  products.forEach(function(item){
-    showcase += item.id + ': '
-    showcase += item.name;
-    showcase += ' '.repeat((10 - item.name.length)*2);
-    if (item.quantity > 0){
-      showcase += ' '.repeat((8 - String(item.price).length)*2);
-      showcase += item.price + ' ' + cart_dict.currency;
-      showcase += ' '.repeat(10) + cart_dict.in_stock;
+const init = {
+  main: (function(){
+    let next = true;  
+    while(next){
+      let user_input = +prompt(this.marketPlace(this.products, this.cart_dict));
+      let status = this.validate(user_input, this.cart_dict);
+      if (!status){    
+        continue;
+      }  
+      if(status && user_input != 0){
+        this.cart__addProduct(user_input, this.basket)
+      }    
+      next = confirm(this.onlineStore(this.basket, this.cart_dict));
+    };
+  }),
+  validate:(function(t, o){
+    let a = false;
+    if (t === '' || t === 0){
+      a = true;
     }else{
-      showcase += ' '.repeat(22) + cart_dict.out_of_stock;
+      this.products.forEach(function(el){
+        if(el.id === t){
+          return el.quantity > 0 ? a = true: alert(el.name + ': ' + o.out_of_stock);
+        };
+      });
     }
-    showcase += cart_dict.n;    
-  });
-  showcase += cart_dict.n;
-  showcase += cart_dict.description;
-  return showcase;
-};
-
-function cart__addProduct(user_input){
-  products.forEach(function(el){
-    if(el.id === user_input){
-      arr = {name: el.name, price: el.price, quantity: 1};      
-      basket.push(arr);
-      el.quantity -=1;
-    }
-  });  
-};
-
-function valid_product(user_input){
-  let a = false;
-  if (user_input === '' || user_input === 0){
-    a = true;
-  }else{
-    products.forEach(function(el){
-      if(el.id === user_input){
-        return el.quantity > 0 ? a = true: alert(el.name + ': ' + cart_dict.out_of_stock);
-      };
+    return a;
+  }),
+  cart__addProduct: (function(t, b){
+    this.products.forEach(function(el){
+      if(el.id === t){
+        arr = {name: el.name, price: el.price, quantity: 1};      
+        b.push(arr);
+        el.quantity -=1;
+      }
+    });  
+  }),
+  marketPlace: (function(p, t){
+    let showcase = '';  
+    showcase += this.header(t.market, t);  
+    p.forEach(function(item){
+      showcase += item.id + ': '
+      showcase += item.name;
+      showcase += ' '.repeat((10 - item.name.length)*2);
+      if (item.quantity > 0){
+        showcase += ' '.repeat((8 - String(item.price).length)*2);
+        showcase += item.price + ' ' + t.currency;
+        showcase += ' '.repeat(10) + t.in_stock;
+      }else{
+        showcase += ' '.repeat(22) + t.out_of_stock;
+      }
+      showcase += t.n;    
     });
-  }
-  return a;
-};
-
-const products = [
-  {id: 1, name: 'Asus', price: 900, quantity: 1, },
-  {id: 2, name: 'Lenovo', price: 1200, quantity: 5, },
-  {id: 3, name: 'Epson', price: 300, quantity: 3, },  
-];
-
-const basket = [];
-
-const cart_dict ={  
-  line: '*'.repeat(46),
-  n: '\n', 
-  basket_null: 'Корзина пустая',
-  your_order: 'Ваш заказ',
-  total_products: 'Всего товаров: ',
-  amount: 'На сумму: ',
-  in_stock: 'в наличии',
-  out_of_stock: 'нет в наличии',
-  currency: '₽',
-  unit_of_measurement: 'шт',
-  market: 'МВидео',
-  description: 'Укажите номер товара и нажмите "ОК", \nдля завершения "Отмена"',
-  message_basket: 'Продолжить покупки - нажмите "ОК", \nдля завершения "Отмена"',
+    showcase += t.n;
+    showcase += t.description;
+    return showcase;
+  }),
+  onlineStore: (function (b, t){
+    const obj = this.cartObject();
+    let order = '';  
+    b.forEach(function(item){
+      let total = item.price * item.quantity;
+      obj.sum += total;
+      obj.quantity += item.quantity;
+      order += item.name;
+      order += ' '.repeat((20 - (item.name.length + String(item.quantity).length))*2);
+      order += item.quantity + ' ' + t.unit_of_measurement;
+      order += ' '.repeat((11 - String(total).length)*2);
+      order += total + ' ' + t.currency;
+      order += t.n;    
+    });  
+    return obj.quantity < 1 ? this.header(t.basket_null, t, t.message_basket) : this.basketCart(order, obj, t);
+  }),
+  basketCart: (function (order, obj, t) {
+    let c = '';
+    c += this.header(t.your_order, t);
+    c += order;
+    c += this.footer(obj, t)
+    return c;
+  }),
+  footer: (function (obj, t){
+    let c = '';
+    c += t.line;
+    c += t.n;
+    c += t.total_products + ' ' + obj.quantity + ' ' + t.unit_of_measurement;
+    c += t.n;
+    c += t.amount + obj.sum + ' ' + t.currency;
+    c += t.n;
+    c += t.n;
+    c += t.message_basket;
+    return c;
+  }),
+  header: (function (o, t, m=false) {
+    let c = '';
+    c += t.line;
+    c += t.n;
+    c += o;
+    c += t.n;
+    c += t.line;
+    c += t.n;
+    c += m ? m: '';
+    return c;
+  }),
+  cartObject: (function (){
+    const cart = new Object();
+    cart['sum'] = 0;
+    cart['quantity'] = 0;
+    return cart
+  }),  
+  cart_dict: {  
+    line: '*'.repeat(46),
+    n: '\n', 
+    basket_null: 'Корзина пустая',
+    your_order: 'Ваш заказ',
+    total_products: 'Всего товаров: ',
+    amount: 'На сумму: ',
+    in_stock: 'в наличии',
+    out_of_stock: 'нет в наличии',
+    currency: '₽',
+    unit_of_measurement: 'шт',
+    market: 'МВидео',
+    description: 'Укажите номер товара и нажмите "ОК", \nдля завершения "Отмена"',
+    message_basket: 'Продолжить покупки - нажмите "ОК", \nдля завершения "Отмена"',  
+  },
+  basket: [    
+  ],
+  products: [
+    {id: 1, name: 'Asus', price: 900, quantity: 1, },
+    {id: 2, name: 'Lenovo', price: 1200, quantity: 5, },
+    {id: 3, name: 'Epson', price: 300, quantity: 2, },  
+  ],
 }
 
-let next = true;
-
-while(next){
-  user_input = +prompt(marketPlace(products));
-  let status = valid_product(user_input);
-  if (!status){    
-     continue;
-  }
-
-  if(status && user_input != 0){
-    cart__addProduct(user_input)
-  }
-  
-  next = confirm(onlineStore(basket));
-};
+init.main();
