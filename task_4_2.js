@@ -6,7 +6,7 @@
 */
 
 const init = {
-  main: (function(){
+  main(){
     let next = true;  
     while(next){
       let user_input = +prompt(this.marketPlace(this.products, this.cart_dict));
@@ -19,8 +19,8 @@ const init = {
       }    
       next = confirm(this.onlineStore(this.basket, this.cart_dict));
     };
-  }),
-  validate:(function(t, o){
+  },
+  validate(t, o){
     let a = false;
     if (t === '' || t === 0){
       a = true;
@@ -32,8 +32,8 @@ const init = {
       });
     }
     return a;
-  }),
-  cart__addProduct: (function(t, b){
+  },
+  cart__addProduct(t, b){
     this.products.forEach(function(el){
       if(el.id === t){
         arr = {name: el.name, price: el.price, quantity: 1};      
@@ -41,8 +41,8 @@ const init = {
         el.quantity -=1;
       }
     });  
-  }),
-  marketPlace: (function(p, t){
+  },
+  marketPlace(p, t){
     let showcase = '';  
     showcase += this.header(t.market, t);  
     p.forEach(function(item){
@@ -61,8 +61,8 @@ const init = {
     showcase += t.n;
     showcase += t.description;
     return showcase;
-  }),
-  onlineStore: (function (b, t){
+  },
+  onlineStore(b, t){
     const obj = this.cartObject();
     let order = '';  
     b.forEach(function(item){
@@ -77,15 +77,15 @@ const init = {
       order += t.n;    
     });  
     return obj.quantity < 1 ? this.header(t.basket_null, t, t.message_basket) : this.basketCart(order, obj, t);
-  }),
-  basketCart: (function (order, obj, t) {
+  },
+  basketCart(order, obj, t) {
     let c = '';
     c += this.header(t.your_order, t);
     c += order;
     c += this.footer(obj, t)
     return c;
-  }),
-  footer: (function (obj, t){
+  },
+  footer(obj, t){
     let c = '';
     c += t.line;
     c += t.n;
@@ -96,8 +96,8 @@ const init = {
     c += t.n;
     c += t.message_basket;
     return c;
-  }),
-  header: (function (o, t, m=false) {
+  },
+  header(o, t, m=false) {
     let c = '';
     c += t.line;
     c += t.n;
@@ -107,13 +107,13 @@ const init = {
     c += t.n;
     c += m ? m: '';
     return c;
-  }),
-  cartObject: (function (){
+  },
+  cartObject(){
     const cart = new Object();
     cart['sum'] = 0;
     cart['quantity'] = 0;
     return cart
-  }),  
+  },  
   cart_dict: {  
     line: '*'.repeat(46),
     n: '\n', 
